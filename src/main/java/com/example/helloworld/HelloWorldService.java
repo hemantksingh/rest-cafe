@@ -30,6 +30,8 @@ public class HelloWorldService extends Application<HelloWorldConfiguration> {
                 configuration.getTemplate(),
                 configuration.getDefaultName()
         );
+        environment.healthChecks().register("template",
+                new TemplateHealthCheck(configuration.getTemplate()));
         environment.jersey().register(helloWorldResource);
     }
 }
