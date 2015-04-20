@@ -33,5 +33,6 @@ public class HelloWorldService extends Application<HelloWorldConfiguration> {
         environment.healthChecks().register("template",
                 new TemplateHealthCheck(configuration.getTemplate()));
         environment.jersey().register(helloWorldResource);
+        environment.jersey().register(new DocumentResource());
     }
 }
