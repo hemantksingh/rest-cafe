@@ -4,7 +4,7 @@ public class Order {
     public final long id;
     public final String location;
     public final String name;
-    public final String quantity;
+    public final int quantity;
     public final String milk;
     public final String size;
     public final OrderStatus status;
@@ -12,7 +12,7 @@ public class Order {
     public Order(long id,
                  String location,
                  String name,
-                 String quantity,
+                 int quantity,
                  String milk,
                  String size) {
 

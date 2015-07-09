@@ -1,6 +1,7 @@
 package com.example.helloworld;
 
 
+import com.example.order.OrderRepository;
 import com.example.order.OrderResource;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
@@ -37,6 +38,6 @@ public class HelloWorldService extends Application<HelloWorldConfiguration> {
         environment.jersey().register(new LoggingFilter(logger, true));
         environment.jersey().register(helloWorldResource);
         environment.jersey().register(new DocumentResource());
-        environment.jersey().register(new OrderResource(configuration.baseUrl));
+        environment.jersey().register(new OrderResource(configuration.baseUrl, new OrderRepository()));
     }
 }

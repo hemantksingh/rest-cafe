@@ -2,26 +2,28 @@ package com.example.order;
 
 import com.codahale.metrics.annotation.Timed;
 
+import javax.validation.Validation;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Path("/order")
 @Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class OrderResource {
 
     private final String baseUrl;
     private AtomicLong counter;
-    private Map<String, Order> orders;
+    private final OrderRepository repository;
 
-    public OrderResource(String baseUrl) {
+    public OrderResource(String baseUrl, OrderRepository repository) {
         this.baseUrl = baseUrl;
         this.counter = new AtomicLong();
         this.counter.getAndIncrement();
-        this.orders = new HashMap<>();
+        this.repository = repository;
     }
 
 
@@ -30,16 +32,31 @@ public class OrderResource {
     public Response createOrder(CreateOrderDetail orderDetail) {
         Order order;
         try {
+            CreateOrderCommand command = new CreateOrderCommand(orderDetail);
+
+            List<String> validationErrors = Validation
+                    .buildDefaultValidatorFactory()
+                    .getValidator()
+                    .validate(command)
+                    .stream()
+                    .map(violation -> violation.getMessage())
+                    .collect(Collectors.toList());
+
+            if(!validationErrors.isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(validationErrors)
+                        .build();
+            }
+
             long orderId = this.counter.getAndIncrement();
-
             order = new Order(orderId,
-                    orderDetail.location,
-                    orderDetail.name,
-                    orderDetail.quantity,
-                    orderDetail.milk,
-                    orderDetail.size);
+                    command.location,
+                    command.name,
+                    command.quantity,
+                    command.milk,
+                    command.size);
 
-            orders.put(String.valueOf(orderId), order);
+            repository.save(order);
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -61,7 +78,7 @@ public class OrderResource {
     public Response getOrder(@PathParam("id") String id) {
         Order order;
         try {
-            order = orders.get(id);
+            order = repository.get(id);
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Unexpected error occurred while processing your request.")
