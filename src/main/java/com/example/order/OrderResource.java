@@ -1,11 +1,12 @@
 package com.example.order;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.ImmutableMap;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Path("/order")
@@ -13,52 +14,63 @@ import java.util.concurrent.atomic.AtomicLong;
 public class OrderResource {
 
     private AtomicLong counter;
-    private ImmutableMap<String, Order> orders;
+    private Map<String, Order> orders;
 
     public OrderResource() {
         this.counter = new AtomicLong();
         this.counter.getAndIncrement();
+        this.orders = new HashMap<>();
     }
 
 
     @POST
     @Timed
     public Response createOrder(OrderDetail orderDetail) {
-        long orderId = this.counter.getAndIncrement();
+        Order order;
+        try {
+            long orderId = this.counter.getAndIncrement();
 
-        Order order = new Order(orderId,
-                orderDetail.location,
-                orderDetail.name,
-                orderDetail.quantity,
-                orderDetail.milk,
-                orderDetail.size);
+            order = new Order(orderId,
+                    orderDetail.location,
+                    orderDetail.name,
+                    orderDetail.quantity,
+                    orderDetail.milk,
+                    orderDetail.size);
 
-        orders = ImmutableMap.<String, Order>builder()
-                .put(String.valueOf(orderId), order)
-                .build();
+            orders.put(String.valueOf(orderId), order);
 
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
 
-        Response response = Response.status(201)
+        return Response.status(Response.Status.CREATED)
                 .entity(order)
                 .header("Location",
-                        String.format("localhost:8080/order/%d", orderId))
+                        String.format("localhost:8080/order/%d", order.id))
                 .build();
-
-        return response;
     }
 
     @GET
     @Path("/{id}")
     @Timed
     public Response getOrder(@PathParam("id") String id) {
-        Order order = orders.get(id);
-
-        if(order == null) {
-            return Response.status(404)
+        Order order;
+        try {
+            order = orders.get(id);
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .tag("Unexpected error.")
                     .build();
         }
 
-        return Response.status(200)
+        if (order == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .tag("No order found for id - " + id)
+                    .build();
+        }
+
+        return Response.status(Response.Status.OK)
                 .entity(order)
                 .build();
     }
