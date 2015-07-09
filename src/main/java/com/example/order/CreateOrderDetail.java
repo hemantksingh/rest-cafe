@@ -1,9 +1,6 @@
 package com.example.order;
 
-public class OrderDetail {
-    public OrderDetail() {
-
-    }
+public class CreateOrderDetail {
 
     public String location;
     public String name;

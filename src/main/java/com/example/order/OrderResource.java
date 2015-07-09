@@ -3,12 +3,14 @@ package com.example.order;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Path("/order")
+@Consumes(MediaType.APPLICATION_JSON)
 public class OrderResource {
 
     private final String baseUrl;
@@ -25,7 +27,7 @@ public class OrderResource {
 
     @POST
     @Timed
-    public Response createOrder(OrderDetail orderDetail) {
+    public Response createOrder(CreateOrderDetail orderDetail) {
         Order order;
         try {
             long orderId = this.counter.getAndIncrement();
@@ -41,13 +43,14 @@ public class OrderResource {
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Unexpected error occurred while processing your request.")
                     .build();
         }
 
         return Response.status(Response.Status.CREATED)
                 .entity(order)
                 .header("Location",
-                        String.format("%s/order/%d", baseUrl, order.id))
+                        String.format("http://%s/order/%d", baseUrl, order.id))
                 .build();
     }
 
@@ -61,13 +64,13 @@ public class OrderResource {
             order = orders.get(id);
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .tag("Unexpected error.")
+                    .entity("Unexpected error occurred while processing your request.")
                     .build();
         }
 
         if (order == null) {
             return Response.status(Response.Status.NOT_FOUND)
-                    .tag("No order found for id - " + id)
+                    .entity(String.format("No order found for id - '%s' ", id))
                     .build();
         }
 
