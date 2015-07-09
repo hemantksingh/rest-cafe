@@ -5,10 +5,9 @@ import com.example.order.OrderResource;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.glassfish.jersey.filter.LoggingFilter;
+import java.util.logging.Logger;
 
-/**
- * Created by hkumar on 07/04/2015.
- */
 public class HelloWorldService extends Application<HelloWorldConfiguration> {
 
     public static void main(String[] args) throws Exception {
@@ -31,6 +30,9 @@ public class HelloWorldService extends Application<HelloWorldConfiguration> {
                 configuration.getTemplate(),
                 configuration.getDefaultName()
         );
+
+        final Logger logger = Logger.getLogger(LoggingFilter.class.getName());
+        environment.jersey().register(new LoggingFilter(logger, true));
         environment.healthChecks().register("template",
                 new TemplateHealthCheck(configuration.getTemplate()));
         environment.jersey().register(helloWorldResource);
