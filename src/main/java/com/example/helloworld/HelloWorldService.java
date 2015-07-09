@@ -1,6 +1,7 @@
 package com.example.helloworld;
 
 
+import com.example.order.OrderResource;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -34,5 +35,6 @@ public class HelloWorldService extends Application<HelloWorldConfiguration> {
                 new TemplateHealthCheck(configuration.getTemplate()));
         environment.jersey().register(helloWorldResource);
         environment.jersey().register(new DocumentResource());
+        environment.jersey().register(new OrderResource());
     }
 }
