@@ -3,9 +3,7 @@ package com.example.order;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.concurrent.atomic.AtomicLong;
@@ -15,9 +13,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class OrderResource {
 
     private AtomicLong counter;
+    private ImmutableMap<String, Order> orders;
 
     public OrderResource() {
         this.counter = new AtomicLong();
+        this.counter.getAndIncrement();
     }
 
 
@@ -26,14 +26,17 @@ public class OrderResource {
     public Response createOrder(OrderDetail orderDetail) {
         long orderId = this.counter.getAndIncrement();
 
-        ImmutableMap<String, String> order = ImmutableMap.<String, String>builder()
-                .put("orderId", String.valueOf(orderId))
-                .put("location", orderDetail.location)
-                .put("name", orderDetail.name)
-                .put("quantity", orderDetail.quantity)
-                .put("milk", orderDetail.milk)
-                .put("size", orderDetail.size)
+        Order order = new Order(orderId,
+                orderDetail.location,
+                orderDetail.name,
+                orderDetail.quantity,
+                orderDetail.milk,
+                orderDetail.size);
+
+        orders = ImmutableMap.<String, Order>builder()
+                .put(String.valueOf(orderId), order)
                 .build();
+
 
         Response response = Response.status(201)
                 .entity(order)
@@ -42,5 +45,21 @@ public class OrderResource {
                 .build();
 
         return response;
+    }
+
+    @GET
+    @Path("/{id}")
+    @Timed
+    public Response getOrder(@PathParam("id") String id) {
+        Order order = orders.get(id);
+
+        if(order == null) {
+            return Response.status(404)
+                    .build();
+        }
+
+        return Response.status(200)
+                .entity(order)
+                .build();
     }
 }
