@@ -27,16 +27,16 @@ public class HelloWorldService extends Application<HelloWorldConfiguration> {
     @Override
     public void run(HelloWorldConfiguration configuration, Environment environment) throws Exception {
         final HelloWorldResource helloWorldResource = new HelloWorldResource(
-                configuration.getTemplate(),
-                configuration.getDefaultName()
+                configuration.template,
+                configuration.defaultName
         );
 
         final Logger logger = Logger.getLogger(LoggingFilter.class.getName());
-        environment.jersey().register(new LoggingFilter(logger, true));
         environment.healthChecks().register("template",
-                new TemplateHealthCheck(configuration.getTemplate()));
+                new TemplateHealthCheck(configuration.template));
+        environment.jersey().register(new LoggingFilter(logger, true));
         environment.jersey().register(helloWorldResource);
         environment.jersey().register(new DocumentResource());
-        environment.jersey().register(new OrderResource());
+        environment.jersey().register(new OrderResource(configuration.baseUrl));
     }
 }
