@@ -1,11 +1,15 @@
 package com.example.order;
 
+import com.example.Command;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 public class CreateOrderCommand {
+
+    private Command command = new Command(this);
 
     @Size(min = 2, max = 10, message = "Order name length must be between 2 and 10.")
     public final String name;
@@ -28,5 +32,13 @@ public class CreateOrderCommand {
         quantity = Integer.parseInt(orderDetail.quantity);
         milk = orderDetail.milk;
         size = orderDetail.size;
+    }
+
+    public boolean isValid() {
+        return command.isValid();
+    }
+
+    public List<String> getValidationErrors() {
+        return command.getValidationErrors();
     }
 }

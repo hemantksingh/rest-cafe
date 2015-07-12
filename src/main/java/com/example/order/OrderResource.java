@@ -2,13 +2,10 @@ package com.example.order;
 
 import com.codahale.metrics.annotation.Timed;
 
-import javax.validation.Validation;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Path("/order")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -34,17 +31,9 @@ public class OrderResource {
         try {
             CreateOrderCommand command = new CreateOrderCommand(orderDetail);
 
-            List<String> validationErrors = Validation
-                    .buildDefaultValidatorFactory()
-                    .getValidator()
-                    .validate(command)
-                    .stream()
-                    .map(violation -> violation.getMessage())
-                    .collect(Collectors.toList());
-
-            if(!validationErrors.isEmpty()) {
+            if (!command.isValid()) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(validationErrors)
+                        .entity(command.getValidationErrors())
                         .build();
             }
 
@@ -54,7 +43,8 @@ public class OrderResource {
                     command.name,
                     command.quantity,
                     command.milk,
-                    command.size);
+                    command.size,
+                    Order.OrderStatus.Pending);
 
             repository.save(order);
 
@@ -93,6 +83,41 @@ public class OrderResource {
 
         return Response.status(Response.Status.OK)
                 .entity(order)
+                .build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Timed
+    public Response updateOrder(@PathParam("id") String id, ChangeQuantityDetail detail) {
+
+        Order newOrder;
+        try {
+            Order order = repository.get(id);
+            if (order == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(String.format("No order found for id - '%s' ", id))
+                        .build();
+            }
+
+            ChangeQuantityCommand command = new ChangeQuantityCommand(detail);
+            if (!command.isValid()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(command.getValidationErrors())
+                        .build();
+            }
+
+            newOrder = order.changeQuantity(command.quantity);
+            repository.save(newOrder);
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Unexpected error occurred while processing your request.")
+                    .build();
+        }
+
+        return Response.status(Response.Status.OK)
+                .entity(newOrder)
                 .build();
     }
 }

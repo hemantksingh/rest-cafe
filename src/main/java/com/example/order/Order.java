@@ -14,7 +14,8 @@ public class Order {
                  String name,
                  int quantity,
                  String milk,
-                 String size) {
+                 String size,
+                 OrderStatus status) {
 
         this.id = id;
         this.location = location;
@@ -22,7 +23,17 @@ public class Order {
         this.quantity = quantity;
         this.milk = milk;
         this.size = size;
-        this.status = OrderStatus.Pending;
+        this.status = status;
+    }
+
+    public Order changeQuantity(int quantity) {
+        return new Order(id,
+                        location,
+                        name,
+                        quantity,
+                        milk,
+                        size,
+                        status);
     }
 
     enum OrderStatus {
