@@ -27,6 +27,8 @@ public class Order {
     }
 
     public Order changeQuantity(int quantity) {
+        if(this.status != OrderStatus.Pending)
+            throw new UnsupportedOperationException("Order already made or served.");
         return new Order(id,
                         location,
                         name,
@@ -34,6 +36,32 @@ public class Order {
                         milk,
                         size,
                         status);
+    }
+
+    public Order make() {
+        if(this.status == OrderStatus.Served)
+            throw new UnsupportedOperationException("Order has already been served.");
+
+        return new Order(id,
+                location,
+                name,
+                quantity,
+                milk,
+                size,
+                OrderStatus.Ready);
+    }
+
+    public Order serve() {
+        if(this.status != OrderStatus.Ready)
+            throw new UnsupportedOperationException("Order not yet ready to serve.");
+
+        return new Order(id,
+                location,
+                name,
+                quantity,
+                milk,
+                size,
+                OrderStatus.Served);
     }
 
     enum OrderStatus {

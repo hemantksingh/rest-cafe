@@ -89,11 +89,12 @@ public class OrderResource {
     @PUT
     @Path("/{id}")
     @Timed
-    public Response updateOrder(@PathParam("id") String id, ChangeQuantityDetail detail) {
+    public Response changeQuantity(@PathParam("id") String id, ChangeQuantityDetail detail) {
 
         Order newOrder;
+        Order order = null;
         try {
-            Order order = repository.get(id);
+            order = repository.get(id);
             if (order == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(String.format("No order found for id - '%s' ", id))
@@ -110,6 +111,76 @@ public class OrderResource {
             newOrder = order.changeQuantity(command.quantity);
             repository.save(newOrder);
 
+        } catch (UnsupportedOperationException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(order)
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Unexpected error occurred while processing your request.")
+                    .build();
+        }
+
+        return Response.status(Response.Status.OK)
+                .entity(newOrder)
+                .build();
+    }
+
+    @PUT
+    @Path("/{id}/make")
+    @Timed
+    public Response makeOrder(@PathParam("id") String id) {
+
+        Order newOrder;
+        Order order = null;
+        try {
+            order = repository.get(id);
+            if (order == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(String.format("No order found for id - '%s' ", id))
+                        .build();
+            }
+
+            newOrder = order.make();
+            repository.save(newOrder);
+
+        } catch (UnsupportedOperationException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(order)
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Unexpected error occurred while processing your request.")
+                    .build();
+        }
+
+        return Response.status(Response.Status.OK)
+                .entity(newOrder)
+                .build();
+    }
+
+    @PUT
+    @Path("/{id}/serve")
+    @Timed
+    public Response serveOrder(@PathParam("id") String id) {
+
+        Order newOrder;
+        Order order = null;
+        try {
+            order = repository.get(id);
+            if (order == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(String.format("No order found for id - '%s' ", id))
+                        .build();
+            }
+
+            newOrder = order.serve();
+            repository.save(newOrder);
+
+        } catch (UnsupportedOperationException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(order)
+                    .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Unexpected error occurred while processing your request.")
