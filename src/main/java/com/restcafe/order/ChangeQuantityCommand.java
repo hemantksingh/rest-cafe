@@ -1,6 +1,4 @@
-package com.example.order;
-
-import com.example.Command;
+package com.restcafe.order;
 
 import javax.validation.constraints.Min;
 import java.util.List;

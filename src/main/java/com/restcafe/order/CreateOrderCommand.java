@@ -1,6 +1,5 @@
-package com.example.order;
+package com.restcafe.order;
 
-import com.example.Command;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Min;

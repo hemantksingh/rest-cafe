@@ -1,4 +1,4 @@
-package com.example.order;
+package com.restcafe.order;
 
 public class Order {
     public final long id;

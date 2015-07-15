@@ -9,7 +9,7 @@ sourceCompatibility = 1.8
 targetCompatibility = '1.8'
 
 version = '0.1'
-mainClassName = "com.example.helloworld.HelloWorldService"
+mainClassName = "com.restcafe.order.OrderService"
 
 project.ext {
     dropwizardVersion = '0.8.0'

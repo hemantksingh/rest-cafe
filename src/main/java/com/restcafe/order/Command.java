@@ -1,4 +1,4 @@
-package com.example;
+package com.restcafe.order;
 
 import javax.validation.Validation;
 import javax.validation.Validator;

@@ -1,4 +1,4 @@
-package com.example.order;
+package com.restcafe.order;
 
 public class CreateOrderDetail {
 
