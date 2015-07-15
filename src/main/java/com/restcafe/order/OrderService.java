@@ -15,7 +15,7 @@ public class OrderService extends Application<OrderConfiguration> {
 
     @Override
     public String getName() {
-        return "hello-world";
+        return "Rest cafe - Drink coffee and keep calm!!";
     }
 
     @Override
